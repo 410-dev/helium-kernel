@@ -8,7 +8,7 @@ import kernel.registry as Registry
 
 def launch(command: str, commandlineArgs: list) -> int:
     # Find executable bundle
-    commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.CordOS.KernelSettings.Programs.Paths"))['data']
+    commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.KernelSettings.Programs.Paths"))['data']
     appropriateCommandPath: str = ""
     for commandPath in commandPaths:
         try:
@@ -20,7 +20,7 @@ def launch(command: str, commandlineArgs: list) -> int:
     
     # If not found, return command not found.
     if appropriateCommandPath == "":
-        return Registry.read("SOFTWARE.CordOS.Kernel.Proc.CommandNotFound")
+        return Registry.read("SOFTWARE.Helium.Kernel.Proc.CommandNotFound")
 
     # If found, import the module and execute it
     try:
@@ -38,7 +38,7 @@ def launch(command: str, commandlineArgs: list) -> int:
         command_instance.exec()
         
     except Exception as e:
-        if Registry.read("SOFTWARE.CordOS.KernelSettings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
-        if Registry.read("SOFTWARE.CordOS.KernelSettings.PrintTraceback") == "1": traceback.print_exc()
-        return Registry.read("SOFTWARE.CordOS.Kernel.Proc.CommandExitFailure")
+        if Registry.read("SOFTWARE.Helium.KernelSettings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
+        if Registry.read("SOFTWARE.Helium.KernelSettings.PrintTraceback") == "1": traceback.print_exc()
+        return Registry.read("SOFTWARE.Helium.Kernel.Proc.CommandExitFailure")
         

@@ -13,7 +13,7 @@ class Help:
 
     def exec(self):
         try: 
-            commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.CordOS.KernelSettings.Programs.Paths"))['data']
+            commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.KernelSettings.Programs.Paths"))['data']
             
             if len(self.args) == 0:
                 # Print current manual
@@ -33,7 +33,7 @@ class Help:
             
             # If not found, return command not found.
             if helpString == "":
-                return Registry.read("SOFTWARE.CordOS.Kernel.Proc.CommandNotFound")
+                return Registry.read("SOFTWARE.Helium.Kernel.Proc.CommandNotFound")
             
             print(helpString)
         except Exception as e:

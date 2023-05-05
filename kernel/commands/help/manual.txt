@@ -1,1 +1,6 @@
-Hello
+Show command usage / description about the command
+
+Usage:
+    help           : Show this message
+    help <command> : Show the manual of the command
+    
