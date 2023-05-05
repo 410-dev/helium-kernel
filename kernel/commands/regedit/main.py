@@ -41,7 +41,7 @@ class Regedit:
                 print(f"Invalid number of arguments. Expected 1 or 2, got {len(self.args)}")
             
         except Exception as e:
-            if Registry.read("SOFTWARE.Helium.KernelSettings.PrintTraceback") == "1": traceback.print_exc()
+            if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
             print(f"Error in settings. e: {e}")
         
     def interactive(self):
