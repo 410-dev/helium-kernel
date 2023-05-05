@@ -1,5 +1,8 @@
 import kernel.procmgr as procmgr
 import kernel.argsParser as argsParser
+import kernel.hookmgr as hookmgr
+
+hookmgr.runHooks([], True)
 
 while True:
     userIn: str = input(">>> ")
