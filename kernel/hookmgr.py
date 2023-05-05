@@ -17,7 +17,7 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
         blacklists = blacklistData['data']
     else:
         hooksPath = Registry.read("SOFTWARE.Helium.Values.Data.Struct.Hooks")
-        blacklistData = Registry.read("SOFTWARE.Helium.Hooks.UserBlacklist")
+        blacklistData = Registry.read("SOFTWARE.Helium.Hooks.OtherBlacklist")
         blacklistData = json.loads(blacklistData)
         blacklists = blacklistData['data']
 

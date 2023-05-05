@@ -3,6 +3,7 @@ import kernel.argsParser as argsParser
 import kernel.hookmgr as hookmgr
 
 hookmgr.runHooks([], True)
+hookmgr.runHooks([], False)
 
 while True:
     userIn: str = input(">>> ")
