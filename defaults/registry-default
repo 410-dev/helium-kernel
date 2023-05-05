@@ -1,4 +1,4 @@
-SOFTWARE.Helium.Settings.Programs.Paths={"data": ["kernel/commands/", "commands/"]}
+SOFTWARE.Helium.Settings.Programs.Paths={"data": ["kernel/commands/", "data/commands/"]}
 SOFTWARE.Helium.Settings.Programs.OthersEnabled=1
 SOFTWARE.Helium.Settings.Profiles.Foundation=Helium
 SOFTWARE.Helium.Settings.Profiles.Version=1.0
@@ -7,7 +7,7 @@ SOFTWARE.Helium.Settings.Hooks.OthersEnabled=0
 SOFTWARE.Helium.Settings.KernelModulesVerbose=0
 SOFTWARE.Helium.Hooks.KernelBlacklist={"data": []}
 SOFTWARE.Helium.Hooks.OtherBlacklist={"data": []}
-SOFTWARE.Helium.Values.Proc.CommandNotFound=-1
+SOFTWARE.Helium.Values.Proc.CommandNotFound=2
 SOFTWARE.Helium.Values.Proc.CommandExitSuccess=0
 SOFTWARE.Helium.Values.Proc.CommandExitFailure=1
 SOFTWARE.Helium.Values.Proc.CommandInterrupted=128
