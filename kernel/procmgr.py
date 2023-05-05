@@ -8,7 +8,7 @@ import kernel.registry as Registry
 
 def launch(command: str, commandlineArgs: list) -> int:
     # Find executable bundle
-    commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.KernelSettings.Programs.Paths"))['data']
+    commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.Settings.Programs.Paths"))['data']
     appropriateCommandPath: str = ""
     for commandPath in commandPaths:
         try:
@@ -20,25 +20,27 @@ def launch(command: str, commandlineArgs: list) -> int:
     
     # If not found, return command not found.
     if appropriateCommandPath == "":
-        return Registry.read("SOFTWARE.Helium.Kernel.Proc.CommandNotFound")
+        return Registry.read("SOFTWARE.Helium.Values.Proc.CommandNotFound")
 
     # If found, import the module and execute it
     try:
-        module_name = f"{appropriateCommandPath.replace('/', '.')}{command}.main"
-        module = importlib.import_module(module_name)
-        
-        # Reload
-        importlib.reload(module)
-
-        # Get the class
-        CommandClass = getattr(module, command.capitalize())
-
-        # Instantiate the command and execute it
-        command_instance = CommandClass(commandlineArgs)
-        command_instance.exec()
-        
+        exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", command.capitalize(), commandlineArgs)
     except Exception as e:
-        if Registry.read("SOFTWARE.Helium.KernelSettings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
-        if Registry.read("SOFTWARE.Helium.KernelSettings.PrintTraceback") == "1": traceback.print_exc()
-        return Registry.read("SOFTWARE.Helium.Kernel.Proc.CommandExitFailure")
-        
+        if Registry.read("SOFTWARE.Helium.Settings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
+        if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
+        return Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitFailure")
+
+def exec(commandPath: str, className: str, commandlineArgs: list) -> int:
+    module_name = f"{commandPath.replace('/', '.')}".split(".py")[0]
+    module = importlib.import_module(module_name)
+    
+    # Reload
+    importlib.reload(module)
+
+    # Get the class
+    CommandClass = getattr(module, className)
+
+    # Instantiate the command and execute it
+    command_instance = CommandClass(commandlineArgs)
+    command_instance.exec()
+    
