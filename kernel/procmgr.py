@@ -24,7 +24,7 @@ def launch(command: str, commandlineArgs: list) -> int:
 
     # If found, import the module and execute it
     try:
-        exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", command.capitalize(), commandlineArgs)
+        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", command.capitalize(), commandlineArgs)
     except Exception as e:
         if Registry.read("SOFTWARE.Helium.Settings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
         if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
@@ -42,5 +42,9 @@ def exec(commandPath: str, className: str, commandlineArgs: list) -> int:
 
     # Instantiate the command and execute it
     command_instance = CommandClass(commandlineArgs)
-    command_instance.exec()
+    result = command_instance.exec()
+    if result == None:
+        return int(Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess"))
+    else:
+        return int(result)
     
