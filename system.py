@@ -5,10 +5,11 @@ import kernel.hookmgr as hookmgr
 hookmgr.runHooks([], True)
 hookmgr.runHooks([], False)
 
+val = 0
 while True:
-    userIn: str = input(">>> ")
+    userIn: str = input(f"{val} >>> ")
     if userIn == "exit":
         break
     args = argsParser.parse(userIn.split())
-    procmgr.launch(args[0], args[1:])
+    val = procmgr.launch(args[0], args[1:])
     
