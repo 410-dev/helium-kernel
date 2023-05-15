@@ -13,19 +13,24 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
     if kernelHooks:
         hooksPath = "kernel/hooks/"
         blacklistData = Registry.read("SOFTWARE.Helium.Hooks.KernelBlacklist")
-        blacklistData = json.loads(blacklistData)
-        blacklists = blacklistData['data']
+        if blacklistData != None:
+            blacklistData = json.loads(blacklistData)
+            blacklists = blacklistData['data']
     else:
         hooksPath = Registry.read("SOFTWARE.Helium.Values.Data.Struct.Hooks")
         blacklistData = Registry.read("SOFTWARE.Helium.Hooks.OtherBlacklist")
-        blacklistData = json.loads(blacklistData)
-        blacklists = blacklistData['data']
+        if blacklistData != None:
+            blacklistData = json.loads(blacklistData)
+            blacklists = blacklistData['data']
 
     hooks: list = os.listdir(hooksPath)
     
     report: list = []
     
     for hook in hooks:
+        if hook.startswith("_") or hook.startswith("."):
+            continue
+        
         if hook in blacklists:
             if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1": 
                 print(f"Hook '{hook}' is blacklisted, skipping...")
@@ -35,10 +40,12 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
             print(f"Running hook '{hook}'...")
         
         hookPath: str = os.path.join(hooksPath, hook)
-        with open(hookPath, 'r') as f:
-            exitcode = procmgr.exec(hookPath, hook.split(".py")[0], parameters)
-            reportRow = [hook, exitcode]
-            report.append(reportRow)
-            if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1":
-                print(f"Hook '{hook}' exited with code {exitcode}")
-    
+        try:
+            with open(hookPath, 'r') as f:
+                exitcode = procmgr.exec(hookPath, hook.split(".py")[0], parameters)
+                reportRow = [hook, exitcode]
+                report.append(reportRow)
+                if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1":
+                    print(f"Hook '{hook}' exited with code {exitcode}")
+        except:
+            print(f"ERROR: Failed opening {hookPath}")
