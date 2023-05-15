@@ -2,3 +2,4 @@
 *.DS_Store
 registry/*
 *__pycache__*
+data/*
