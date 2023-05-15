@@ -47,5 +47,5 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
                 report.append(reportRow)
                 if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1":
                     print(f"Hook '{hook}' exited with code {exitcode}")
-        except:
-            print(f"ERROR: Failed opening {hookPath}")
+        except Exception as e:
+            print(f"ERROR: Failed running hook {hookPath}: {e}")
