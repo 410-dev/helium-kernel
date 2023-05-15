@@ -43,8 +43,9 @@ def exec(commandPath: str, className: str, commandlineArgs: list) -> int:
     # Instantiate the command and execute it
     command_instance = CommandClass(commandlineArgs)
     result = command_instance.exec()
-    if result == None:
-        return int(Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess"))
+    successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
+    if result == None or result == successCode:
+        return int(successCode)
     else:
         return int(result)
     

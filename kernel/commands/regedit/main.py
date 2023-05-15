@@ -8,7 +8,7 @@ class Regedit:
     def __init__(self, lineArgs) -> None:
         self.args: list = lineArgs
         
-    def editor(self):
+    def editor(self) -> int:
         try: 
             # Check number of arguments
             if len(self.args) == 0:

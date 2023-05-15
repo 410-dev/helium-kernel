@@ -7,7 +7,7 @@ class DataBuild():
     def __init__(self, args):
         self.args = args
     
-    def exec(self):
+    def exec(self) -> int:
         masterList: str = Registry.read("SOFTWARE.Helium.Values.Data.Struct.MasterList")
         masterList = json.loads(masterList)
         masterList = masterList['data']
@@ -21,4 +21,5 @@ class DataBuild():
                 if not os.path.exists(builtSoFar):
                     os.mkdir(builtSoFar)
         
+        return int(Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess"))
         
