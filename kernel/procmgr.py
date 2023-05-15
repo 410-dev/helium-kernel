@@ -24,7 +24,12 @@ def launch(command: str, commandlineArgs: list) -> int:
 
     # If found, import the module and execute it
     try:
-        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", command.capitalize(), commandlineArgs)
+        className = command.split("-")
+        capitalized_words = [word.capitalize() for word in className]
+
+        # Join the capitalized words without any separator
+        className = "".join(capitalized_words)
+        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", className, commandlineArgs)
     except Exception as e:
         if Registry.read("SOFTWARE.Helium.Settings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
         if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
