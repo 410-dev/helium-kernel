@@ -18,5 +18,7 @@ class System():
             if userIn == "exit":
                 break
             args = argsParser.parse(userIn.split())
+            if len(args) == 0:
+                continue
             val = procmgr.launch(args[0], args[1:])
             
