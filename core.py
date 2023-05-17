@@ -11,4 +11,4 @@ hookmgr.runHooks([], kernelHooks = False)
 
 
 
-procmgr.main("system.py", "System", [])
+procmgr.exec("system.py", "System", [])

@@ -7,7 +7,7 @@ class DataBuild():
     def __init__(self, args):
         self.args = args
     
-    def exec(self) -> int:
+    def main(self) -> int:
         masterList: str = Registry.read("SOFTWARE.Helium.Values.Data.Struct.MasterList")
         masterList = json.loads(masterList)
         masterList = masterList['data']

@@ -11,7 +11,7 @@ class Help:
     def __init__(self, lineArgs) -> None:
         self.args: list = lineArgs
 
-    def exec(self) -> int:
+    def main(self) -> int:
         try: 
             commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.Settings.Programs.Paths"))['data']
             

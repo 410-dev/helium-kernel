@@ -56,7 +56,7 @@ class Regedit:
             self.args = command
             self.editor()
     
-    def exec(self):
+    def main(self):
         if len(self.args) == 0:
             self.interactive()
         else:
