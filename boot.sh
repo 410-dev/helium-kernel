@@ -20,7 +20,7 @@ fi
 
 
 echo -e "${NC}Starting kernel...${NC}"
-python3 system.py "$@" --bootfile 
+python3 core.py "$@" --bootfile 
 
 # If argument contains --clear-cache then remove all directories named __pycache__
 if [[ $1 == "--clear-cache" ]]; then
