@@ -11,12 +11,20 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
     hooksPath: str = ""
     blacklists: list = []
     if kernelHooks:
+        
+        if Registry.read("SOFTWARE.Helium.Settings.Hooks.Enabled") == "0":
+            return []
+        
         hooksPath = "kernel/hooks/"
         blacklistData = Registry.read("SOFTWARE.Helium.Hooks.KernelBlacklist")
         if blacklistData != None:
             blacklistData = json.loads(blacklistData)
             blacklists = blacklistData['data']
     else:
+        
+        if Registry.read("SOFTWARE.Helium.Settings.Hooks.OthersEnabled") == "0":
+            return []
+        
         hooksPath = Registry.read("SOFTWARE.Helium.Values.Data.Struct.Hooks")
         blacklistData = Registry.read("SOFTWARE.Helium.Hooks.OtherBlacklist")
         if blacklistData != None:
