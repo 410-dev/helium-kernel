@@ -50,10 +50,11 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
         hookPath: str = os.path.join(hooksPath, hook)
         try:
             with open(hookPath, 'r') as f:
-                exitcode = procmgr.exec(hookPath, hook.split(".py")[0], parameters)
+                exitcode = procmgr.execScript(hookPath, parameters)
                 reportRow = [hook, exitcode]
                 report.append(reportRow)
                 if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1":
                     print(f"Hook '{hook}' exited with code {exitcode}")
         except Exception as e:
             print(f"ERROR: Failed running hook {hookPath}: {e}")
+            
