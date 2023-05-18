@@ -6,7 +6,7 @@ import traceback
 from typing import List
 import kernel.registry as Registry
 
-def launch(command: str, commandlineArgs: list) -> int:
+def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
     # Find executable bundle
     commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.Settings.Programs.Paths"))['data']
     appropriateCommandPath: str = ""
@@ -29,13 +29,13 @@ def launch(command: str, commandlineArgs: list) -> int:
 
         # Join the capitalized words without any separator
         className = "".join(capitalized_words)
-        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", className, commandlineArgs)
+        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", className, commandlineArgs, returnRaw=returnRaw)
     except Exception as e:
         if Registry.read("SOFTWARE.Helium.Settings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
         if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
         return Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitFailure")
 
-def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodName: str = None) -> int:
+def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodName: str = None, returnRaw: bool = False) -> int:
     module_name = f"{commandPath.replace('/', '.')}".split(".py")[0]
     module = importlib.import_module(module_name)
     
@@ -54,12 +54,15 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
         executeMethod = getattr(command_instance, executeMethodName)
         result = executeMethod()
     successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
+    if returnRaw:
+        return result
+
     if result == None or result == successCode:
         return int(successCode)
     else:
         return int(result)
 
-def execScript(scriptPath: str, functionArgs: list, functionName: str = "main") -> int:
+def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", returnRaw: bool = False) -> int:
     module_name = f"{scriptPath.replace('/', '.')}".split(".py")[0]
     module = importlib.import_module(module_name)
     
@@ -71,6 +74,9 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main") 
 
     # Execute the function with the provided arguments
     result = function(functionArgs)
+
+    if returnRaw:
+        return result
 
     successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
     if result == None or result == successCode:
