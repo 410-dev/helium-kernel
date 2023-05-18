@@ -3,6 +3,7 @@ SOFTWARE.Helium.Settings.Programs.OthersEnabled=1
 SOFTWARE.Helium.Settings.Hooks.Enabled=1 
 SOFTWARE.Helium.Settings.Hooks.OthersEnabled=0
 SOFTWARE.Helium.Settings.KernelModulesVerbose=0
+SOFTWARE.Helium.Settings.RawReturnFlag=0
 SOFTWARE.Helium.Hooks.KernelBlacklist={"data": []}
 SOFTWARE.Helium.Hooks.OtherBlacklist={"data": []}
 SOFTWARE.Helium.Values.Proc.CommandNotFound=2

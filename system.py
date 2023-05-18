@@ -20,5 +20,5 @@ class System():
             args = argsParser.parse(userIn.split())
             if len(args) == 0:
                 continue
-            val = procmgr.launch(args[0], args[1:])
+            val = procmgr.launch(args[0], args[1:], Registry.read("SOFTWARE.Helium.Settings.RawReturnFlag") == "1")
             
