@@ -27,11 +27,11 @@ def read(key: str, regloc: str = "registry"):
 def isKey(key: str, regloc: str = "registry") -> int:
     key = key.replace(".", "/")
     if not os.path.exists(os.path.join(regloc, key)):
-        return 0
+        return 0 # Does not exist
     if os.path.isdir(os.path.join(regloc, key)):
-        return 1
+        return 1 # Is key
     else:
-        return 2
+        return 2 # Is value
     
 def write(key: str, value = None, regloc: str = "registry"):
     key = key.replace(".", "/")
@@ -55,6 +55,19 @@ def write(key: str, value = None, regloc: str = "registry"):
                 f.write(json.dumps(value))
             else:
                 f.write(value)
+
+def delete(key: str, regloc: str = "registry"):
+    key = key.replace(".", "/")
+
+    if isKey(key, regloc) == 0:
+        return
+    
+    elif isKey(key, regloc) == 1:
+        os.rmdir(os.path.join(regloc, key))
+
+    elif isKey(key, regloc) == 2:
+        os.remove(os.path.join(regloc, key))
+    
                 
 def listSubKeys(key: str, subdirectories: list = [], regloc: str = "registry") -> list:
     key = key.replace(".", "/")
@@ -71,7 +84,7 @@ def listSubKeys(key: str, subdirectories: list = [], regloc: str = "registry") -
     return listOfFiles
     
 
-def build(blueprintPath: str, registryPath: str = "registry", silent=False):
+def build(blueprintPath: str, registryPath: str = "registry", silent=False, overwrite=True):
     lines: list = []
     with open(blueprintPath, 'r') as f:
         conf: list = f.readlines()
@@ -85,7 +98,17 @@ def build(blueprintPath: str, registryPath: str = "registry", silent=False):
     for line in lines:
         key = line.split("=")[0]
         value = line.split("=")[1] if len(line.split("=")) > 1 else None
-        if not silent: print(f"[ Generate ] {key}")
-        write(key, value, registryPath)
+        if key.startswith("!"):
+            key = key[1:]
+            if not silent: print(f"[ Delete ] {key}")
+            delete(key, registryPath)
+        if isKey(key, registryPath) != 0 and not overwrite:
+            if not silent: print(f"[  Skip  ] {key}")
+        elif isKey(key, registryPath) != 0 and overwrite:
+            if not silent: print(f"[ Update ] {key}")
+            write(key, value, registryPath)
+        else:
+            if not silent: print(f"[ Create ] {key}")
+            write(key, value, registryPath)
         
     
