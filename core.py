@@ -4,7 +4,7 @@ import kernel.hookmgr as hookmgr
 import kernel.registry as Registry
 import time
 import os
-from kernel.states import IPCMemory
+from kernel.ipcmemory import IPCMemory
 
 IPCMemory.setObj("System.Cache.StartTime.Epoch", round(time.time()*1000), True, "1111")
 IPCMemory.setObj("System.Location.Root", os.path.abspath("./"), True, "1111")
