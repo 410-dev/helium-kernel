@@ -1,7 +1,7 @@
 import kernel.argsParser as argsParser
 import kernel.procmgr as procmgr
 
-from kernel.states import States
+from kernel.states import IPCMemory
 from typing import List
 
 
