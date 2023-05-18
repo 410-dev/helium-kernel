@@ -31,7 +31,9 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
             blacklistData = json.loads(blacklistData)
             blacklists = blacklistData['data']
 
+    # Sort the hooks by alphabetical order
     hooks: list = os.listdir(hooksPath)
+    hooks.sort()
     
     report: list = []
     
@@ -57,4 +59,3 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
                     print(f"Hook '{hook}' exited with code {exitcode}")
         except Exception as e:
             print(f"ERROR: Failed running hook {hookPath}: {e}")
-            
