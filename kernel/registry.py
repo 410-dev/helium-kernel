@@ -33,8 +33,11 @@ def isKey(key: str, regloc: str = "registry") -> int:
     else:
         return 2 # Is value
     
-def write(key: str, value = None, regloc: str = "registry"):
+def write(key: str, value = None, regloc: str = "registry", overwrite = True):
     key = key.replace(".", "/")
+
+    if not overwrite and isKey(key, regloc) == 2:
+        return
     
     # If parent directory does not exist, create all parent directories
     for i in range(len(key.split("/"))):
