@@ -1,5 +1,6 @@
 import kernel.argsParser as argsParser
 import kernel.procmgr as procmgr
+import kernel.registry as Registry
 
 from kernel.ipcmemory import IPCMemory
 from typing import List
