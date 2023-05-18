@@ -54,7 +54,7 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
         executeMethod = getattr(command_instance, executeMethodName)
         result = executeMethod()
     successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
-    if returnRaw:
+    if returnRaw and result != None:
         return result
 
     if result == None or result == successCode:
@@ -75,7 +75,7 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", 
     # Execute the function with the provided arguments
     result = function(functionArgs)
 
-    if returnRaw:
+    if returnRaw and result != None:
         return result
 
     successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
