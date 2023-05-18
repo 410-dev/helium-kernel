@@ -1,4 +1,5 @@
 import inspect
+import datetime
 
 class States():
     
@@ -18,13 +19,15 @@ class States():
         
 
     @staticmethod
-    def setObj(name: str, data, permission = None):
+    def setObj(name: str, data, persistent = False, permission = None):
         # print(inspect.stack())
         # print(f"Setting: {name}   with {data}, permission of {permission}")
         stateObject: dict = {
             "name": name,
             "permission": permission,
-            "written":inspect.stack()[1],
+            "writtenBy": inspect.stack()[1],
+            "writtenAt": datetime.datetime.now(),
+            "persistent": persistent,
             "value": data
         }
         States.objects.append(stateObject)
