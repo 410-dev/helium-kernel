@@ -58,4 +58,22 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
         return int(successCode)
     else:
         return int(result)
+
+def execScript(scriptPath: str, functionArgs: list, functionName: str = "main") -> int:
+    module_name = f"{scriptPath.replace('/', '.')}".split(".py")[0]
+    module = importlib.import_module(module_name)
     
+    # Reload
+    importlib.reload(module)
+
+    # Get the function
+    function = getattr(module, functionName)
+
+    # Execute the function with the provided arguments
+    result = function(functionArgs)
+
+    successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
+    if result == None or result == successCode:
+        return int(successCode)
+    else:
+        return int(result)
