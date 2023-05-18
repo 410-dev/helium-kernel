@@ -1,35 +1,152 @@
 import inspect
-import datetime
+import time
+import os
+import copy
 
-class States():
+
+# Interprocess Communication Memory: This is a class that stores all the objects that are shared between processes
+class IPCMemory():
     
     objects = []
     
     @staticmethod
-    def getObj(name: str, fullData = False):
-        # print(inspect.stack())
-        for obj in States.objects:
+    def getObj(name: str, fullData = False, includeEligiblePermissionData = False):
+
+        # Find the object
+        object = None
+        for obj in IPCMemory.objects:
             if obj["name"] == name:
-                if not fullData:
-                    return obj["value"]
-                else:
-                    return obj
+                object = copy.deepcopy(obj)
+                break
+
+        # If not found, return None
+        if object == None:
+            if includeEligiblePermissionData:
+                return None, None
+            else:
+                return None
+
+        # [Permission Check] Get the system root location
+        rootloc = "./"
+        for obj in IPCMemory.objects:
+            if obj["name"] == "System.Location.Root":
+                rootloc = obj["value"]
+                break
+
+        # [Permission Check] Define spaces for each permission level
+        rootloc = os.path.abspath(rootloc)
+        publicSpace = [os.path.join(rootloc, "data")]
+        userSpace   = [os.path.join(rootloc, "data")]
+        systemSpace = [os.path.join(rootloc, "data", "hooks")]
+        kernelSpace = [os.path.join(rootloc, "kernel")]
+        spaces = [publicSpace, userSpace, systemSpace, kernelSpace]
+
+        # [Permission Check] Get the execution location
+        execLocation = inspect.stack()[1].filename
+        execLocation = os.path.abspath(execLocation)
+
+        # [Permission Check] If the execution location is states.py itself, get the location of the caller
+        idx = 2
+        while execLocation.endswith("kernel/states.py"):
+            execLocation = inspect.stack()[idx].filename
+            execLocation = os.path.abspath(execLocation)
+            idx += 1
+
+
+        lvl = 0  # If lvl is 0, it means it is in no space. 1 means public, 2 means user, 3 means system, 4 means kernel
+        permission = "0"
+
+        # [Permission Check] Check if the execution location is in any of the spaces
+        for space in spaces:
+            for singleSpace in space:
+                if execLocation.startswith(singleSpace):
+                    if space == publicSpace:
+                        lvl = 1
+                    elif space == userSpace:
+                        lvl = 2
+                    elif space == systemSpace:
+                        lvl = 3
+                    elif space == kernelSpace:
+                        lvl = 4
+                    break
         
-        return None
+        # [Permission Check] Update permission. If the execution location and the object's writtenBy location is the same, set permission to 2 (read and write)
+        permission = object["permission"][lvl-1]
+        if execLocation == object["writtenBy"]:
+            permission = "2"
+
+        # [Permission Check] Otherwise, if the object is persistent, set space level to 1 (public space)
+        else:
+            if lvl == 0:
+                print("WARNING: Executing script is not in any space. This is not recommended.")
+                lvl = 1
+
+        # [Permission Check] If the object is not accessible, return None
+        if permission == "0":
+            print(f"WARNING: Executing script ({execLocation}) does not have permission in its space to access this object. Permission: {object['permission']}")
+            if includeEligiblePermissionData:
+                return None, None
+            else:
+                return None
         
+        # If permission is ok, return the object
+        if not fullData:
+            if includeEligiblePermissionData:
+                return object["value"], permission
+            else:
+                return object["value"]
+        else:
+            if includeEligiblePermissionData:
+                return object, permission
+            else:
+                return object
+
 
     @staticmethod
-    def setObj(name: str, data, persistent = False, permission = None):
-        # print(inspect.stack())
-        # print(f"Setting: {name}   with {data}, permission of {permission}")
+    def deleteObj(name: str):
+        object, permission = IPCMemory.getObj(name, fullData=True, includeEligiblePermissionData=True)
+        if object == None:
+            return False
+        else:
+            if permission == "2":
+                IPCMemory.objects.remove(object)
+                return True
+            else:
+                print(f"WARNING: Executing script does not have permission to delete (write) this object. Permission: {object['permission']}")
+                return False
+
+    @staticmethod
+    # Permission notation:    Public, User, System, Kernel    (Public means sub processes executed by user)
+    # Default permission:       0       0      1      2       (0 means no access, 1 means read, 2 means read and write)
+    def setObj(name: str, data, persistent = False, permission = "0012"):
+        if len(permission) != 4:
+            print("Invalid permission length. Setting to default: 0012")
+            permission = "0012"
+
+        if not permission.isnumeric():
+            print("Invalid permission type. Setting to default: 0012")
+            permission = "0012"
+
+        # If the object already exists, remove for update
+        object, existingPermission = IPCMemory.getObj(name, fullData=True, includeEligiblePermissionData=True)
+        if object != None:
+            if existingPermission != "2":
+                print(f"WARNING: Executing script does not have permission to update (write) this object. Permission: {object['permission']}")
+                return False
+
+            if not IPCMemory.deleteObj(name):
+                return False
+            else:
+                print(f"WARNING: Overwriting object: {name}, permission of the object is: {object['permission']}")
+
         stateObject: dict = {
             "name": name,
+            "writtenBy": inspect.stack()[1].filename,
+            "writtenAt": round(time.time()*1000),
             "permission": permission,
-            "writtenBy": inspect.stack()[1],
-            "writtenAt": datetime.datetime.now(),
             "persistent": persistent,
             "value": data
         }
-        States.objects.append(stateObject)
-        
+        IPCMemory.objects.append(stateObject)
+        return True        
     
