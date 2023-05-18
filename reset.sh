@@ -1,3 +1,6 @@
 #!/bin/bash
-rm -rf data
 rm -rf registry
+
+if [[ "$*" == *"--data"* ]]; then
+    rm -rf data
+fi
