@@ -18,6 +18,11 @@ class IPCMemory():
         for i in range(len(IPCMemory.objects)-1, -1, -1):
             obj = IPCMemory.objects[i]
             if obj["name"] == name:
+
+                # Update last access time
+                IPCMemory.objects[i]["lastAccess"] = round(time.time()*1000)
+
+                # Copy object
                 object = copy.deepcopy(obj)
                 break
 
@@ -76,6 +81,7 @@ class IPCMemory():
         permission = object["permission"][lvl-1]
         if execLocation == object["writtenBy"]:
             permission = "2"
+
 
         # [Permission Check] Otherwise, if the object is persistent, set space level to 1 (public space)
         else:
@@ -149,6 +155,7 @@ class IPCMemory():
             "name": name,
             "writtenBy": inspect.stack()[1].filename,
             "writtenAt": round(time.time()*1000),
+            "lastAccess": round(time.time()*1000),
             "permission": permission,
             "persistent": persistent,
             "value": data
