@@ -43,7 +43,7 @@ def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
             "runas": "application",
             "pid": pid
         }
-        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1112")
         IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
 
@@ -75,7 +75,7 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
             "runas": "object-script",
             "pid": pid
         }
-        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1112")
         IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
     # Instantiate the command and execute it
@@ -116,7 +116,7 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", 
             "runas": "script",
             "pid": pid
         }
-        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{scriptPath}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{scriptPath}", argObj, permission="1112")
         IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
     # Execute the function with the provided arguments
