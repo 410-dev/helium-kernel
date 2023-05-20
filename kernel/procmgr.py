@@ -3,8 +3,10 @@ import os
 import importlib
 import traceback
 import inspect
+import copy
 
 from typing import List
+from kernel.ipcmemory import IPCMemory
 import kernel.registry as Registry
 
 def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
@@ -30,14 +32,30 @@ def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
 
         # Join the capitalized words without any separator
         className = "".join(capitalized_words)
-        return exec(f"{appropriateCommandPath.replace('/', '.')}{command}.main.py", className, commandlineArgs, returnRaw=returnRaw)
+        
+        # Create information object
+        pid = int(IPCMemory.getObj("System.kernel.session"))
+        argObj = {
+            "command": command,
+            "executedBy": getParentScript(),
+            "args": commandlineArgs,
+            "bundlePath": os.path.join(appropriateCommandPath, command),
+            "runas": "application",
+            "pid": pid
+        }
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
+
+
+        path = os.path.join(appropriateCommandPath, f"{command}.main.py")
+        return exec(path, className, commandlineArgs, returnRaw=returnRaw)
     except Exception as e:
         if Registry.read("SOFTWARE.Helium.Settings.PrintErrors") == "1": print(f"Error executing command '{command}': {e}")
         if Registry.read("SOFTWARE.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
         return Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitFailure")
 
 def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodName: str = None, returnRaw: bool = False) -> int:
-    module_name = f"{commandPath.replace('/', '.')}".split(".py")[0]
+    module_name = f"{commandPath.replace(os.sep, '.')}".split(".py")[0]
     module = importlib.import_module(module_name)
     
     # Reload
@@ -45,6 +63,20 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
 
     # Get the class
     CommandClass = getattr(module, className)
+
+    # Check if argument has a dictionary of "runas" field
+    if IPCMemory.getObj(f"System.kernel.procmgr.execInfo:{className}") == None:
+        # Create information object
+        pid = int(IPCMemory.getObj("System.kernel.session"))
+        argObj = {
+            "scriptPath": commandPath,
+            "executedBy": getParentScript(),
+            "args": commandlineArgs,
+            "runas": "object-script",
+            "pid": pid
+        }
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
 
     # Instantiate the command and execute it
     command_instance = CommandClass(commandlineArgs)
@@ -64,7 +96,7 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
         return int(result)
 
 def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", returnRaw: bool = False) -> int:
-    module_name = f"{scriptPath.replace('/', '.')}".split(".py")[0]
+    module_name = f"{scriptPath.replace(os.sep, '.')}".split(".py")[0]
     module = importlib.import_module(module_name)
     
     # Reload
@@ -72,6 +104,20 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", 
 
     # Get the function
     function = getattr(module, functionName)
+
+    # Check if argument has a dictionary of "runas" field
+    pid = int(IPCMemory.getObj("System.kernel.session"))
+    if IPCMemory.getObj(f"System.kernel.procmgr.execInfo:{scriptPath}") == None:
+        # Create information object
+        argObj = {
+            "scriptPath": scriptPath,
+            "executedBy": getParentScript(),
+            "args": functionArgs,
+            "runas": "script",
+            "pid": pid
+        }
+        IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{scriptPath}", argObj, permission="1111")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
 
     # Execute the function with the provided arguments
     result = function(functionArgs)
@@ -90,18 +136,18 @@ def getParentScript(nameOnly: bool = False, recursion: bool = True) -> str:
     # Get the parent process
     processName = inspect.stack()[1].filename
 
-    # If nameOnly is true, return only the name of the process
-    if nameOnly:
-        processName = processName.split("/")[-1].split(".py")[0]
-    
     # If recursion is true, return the name of the process that called the parent process
     if recursion:
         originalProcessName = copy.deepcopy(processName)
         stackLevel = 1
-        while processName == originalProcessName:
+        while processName == originalProcessName or processName.find("kernel/procmgr.py") != -1:
             processName = inspect.stack()[stackLevel].filename
             if nameOnly:
                 processName = processName.split("/")[-1].split(".py")[0]
             stackLevel += 1
+
+    # If nameOnly is true, return only the name of the process
+    if nameOnly:
+        processName = processName.split("/")[-1].split(".py")[0]
 
     return processName
