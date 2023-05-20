@@ -8,10 +8,10 @@ from kernel.ipcmemory import IPCMemory
 
 IPCMemory.setObj("System.Cache.StartTime.Epoch", round(time.time()*1000), True, "1111")
 IPCMemory.setObj("System.Location.Root", os.path.abspath("./"), True, "1111")
+IPCMemory.setObj("System.kernel.session", 0, True, "2222")
 
 Registry.build("defaults/registry-default", os.path.join("./", "registry"), silent=True, overwrite=False)
 Registry.build("defaults/registry-enforced", os.path.join("./", "registry"), silent = True, overwrite=True)
-
 
 
 hookmgr.runHooks([], kernelHooks = True)
