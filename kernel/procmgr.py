@@ -143,11 +143,11 @@ def getParentScript(nameOnly: bool = False, recursion: bool = True) -> str:
         while processName == originalProcessName or processName.find("kernel/procmgr.py") != -1:
             processName = inspect.stack()[stackLevel].filename
             if nameOnly:
-                processName = processName.split("/")[-1].split(".py")[0]
+                processName = processName.split(os.sep)[-1].split(".py")[0]
             stackLevel += 1
 
     # If nameOnly is true, return only the name of the process
     if nameOnly:
-        processName = processName.split("/")[-1].split(".py")[0]
+        processName = processName.split(os.sep)[-1].split(".py")[0]
 
     return processName

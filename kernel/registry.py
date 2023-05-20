@@ -2,7 +2,7 @@ import json
 import os
 
 def read(key: str, regloc: str = "registry"):
-    key = key.replace(".", "/")
+    key = key.replace(".", os.sep)
     if not os.path.exists(os.path.join(regloc, key)):
         return None
 
@@ -11,7 +11,7 @@ def read(key: str, regloc: str = "registry"):
         listOfFiles: list = []
         for file in os.listdir(os.path.join(regloc, key)):
             if os.path.isfile(os.path.join(regloc, key, file)) and not file.startswith("."):
-                listOfFiles.append(file + "=" + read(os.path.join(key, file).replace("/", "."), regloc))
+                listOfFiles.append(file + "=" + read(os.path.join(key, file).replace(os.sep, "."), regloc))
             elif os.path.isdir(os.path.join(regloc, key, file)) and not file.startswith("."):
                 listOfFiles.append(file)
                 
@@ -25,7 +25,7 @@ def read(key: str, regloc: str = "registry"):
             return None
 
 def isKey(key: str, regloc: str = "registry") -> int:
-    key = key.replace(".", "/")
+    key = key.replace(".", os.sep)
     if not os.path.exists(os.path.join(regloc, key)):
         return 0 # Does not exist
     if os.path.isdir(os.path.join(regloc, key)):
@@ -34,15 +34,15 @@ def isKey(key: str, regloc: str = "registry") -> int:
         return 2 # Is value
     
 def write(key: str, value = None, regloc: str = "registry", overwrite = True):
-    key = key.replace(".", "/")
+    key = key.replace(".", os.sep)
 
     if not overwrite and isKey(key, regloc) == 2:
         return
     
     # If parent directory does not exist, create all parent directories
-    for i in range(len(key.split("/"))):
-        if not os.path.exists(os.path.join(regloc, "/".join(key.split("/")[:i]))):
-            os.mkdir(os.path.join(regloc, "/".join(key.split("/")[:i])))
+    for i in range(len(key.split(os.sep))):
+        if not os.path.exists(os.path.join(regloc, os.sep.join(key.split(os.sep)[:i]))):
+            os.mkdir(os.path.join(regloc, os.sep.join(key.split(os.sep)[:i])))
     
     
     # If value is none, create directory
@@ -60,7 +60,7 @@ def write(key: str, value = None, regloc: str = "registry", overwrite = True):
                 f.write(value)
 
 def delete(key: str, regloc: str = "registry"):
-    key = key.replace(".", "/")
+    key = key.replace(".", os.sep)
 
     if isKey(key, regloc) == 0:
         return
@@ -73,14 +73,14 @@ def delete(key: str, regloc: str = "registry"):
     
                 
 def listSubKeys(key: str, subdirectories: list = [], regloc: str = "registry") -> list:
-    key = key.replace(".", "/")
+    key = key.replace(".", os.sep)
     if not os.path.exists(os.path.join(regloc, key)):
         return []
         
     listOfFiles: list = []
     for file in os.listdir(os.path.join(regloc, key)):
         if os.path.isfile(os.path.join(regloc, key, file)) and not file.startswith("."):
-            listOfFiles.append(file.replace("/", ".") + "=" + read(os.path.join(key, file).replace("/", "."), regloc))
+            listOfFiles.append(file.replace(os.sep, ".") + "=" + read(os.path.join(key, file).replace(os.sep, "."), regloc))
         elif os.path.isdir(os.path.join(regloc, key, file)) and not file.startswith("."):
             listSubKeys(os.path.join(key, file), subdirectories, regloc)
             
