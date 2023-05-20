@@ -2,6 +2,7 @@ import json
 import os
 import importlib
 import traceback
+import inspect
 
 from typing import List
 import kernel.registry as Registry
@@ -83,3 +84,24 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", 
         return int(successCode)
     else:
         return int(result)
+
+
+def getParentScript(nameOnly: bool = False, recursion: bool = True) -> str:
+    # Get the parent process
+    processName = inspect.stack()[1].filename
+
+    # If nameOnly is true, return only the name of the process
+    if nameOnly:
+        processName = processName.split("/")[-1].split(".py")[0]
+    
+    # If recursion is true, return the name of the process that called the parent process
+    if recursion:
+        originalProcessName = copy.deepcopy(processName)
+        stackLevel = 1
+        while processName == originalProcessName:
+            processName = inspect.stack()[stackLevel].filename
+            if nameOnly:
+                processName = processName.split("/")[-1].split(".py")[0]
+            stackLevel += 1
+
+    return processName
