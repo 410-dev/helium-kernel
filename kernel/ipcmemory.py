@@ -14,7 +14,8 @@ class IPCMemory():
 
         # Find the object
         object = None
-        for obj in IPCMemory.objects:
+        for i in range(len(IPCMemory.objects)-1, -1, -1):
+            obj = IPCMemory.objects[i]
             if obj["name"] == name:
                 object = copy.deepcopy(obj)
                 break
@@ -22,7 +23,7 @@ class IPCMemory():
         # If not found, return None
         if object == None:
             if includeEligiblePermissionData:
-                return None, None
+                return None, "2"
             else:
                 return None
 
@@ -106,13 +107,13 @@ class IPCMemory():
     def deleteObj(name: str):
         object, permission = IPCMemory.getObj(name, fullData=True, includeEligiblePermissionData=True)
         if object == None:
+            print(f"Failed to delete object: {name}, Permission: {permission}")
             return False
         else:
             if permission == "2":
                 IPCMemory.objects.remove(object)
                 return True
             else:
-                print(f"WARNING: Executing script does not have permission to delete (write) this object. Permission: {object['permission']}")
                 return False
 
     @staticmethod
@@ -136,8 +137,6 @@ class IPCMemory():
 
             if not IPCMemory.deleteObj(name):
                 return False
-            else:
-                print(f"WARNING: Overwriting object: {name}, permission of the object is: {object['permission']}")
 
         stateObject: dict = {
             "name": name,
