@@ -44,7 +44,7 @@ def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
             "pid": pid
         }
         IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
-        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
 
         path = os.path.join(appropriateCommandPath, f"{command}.main.py")
@@ -76,7 +76,7 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
             "pid": pid
         }
         IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{className}", argObj, permission="1111")
-        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
     # Instantiate the command and execute it
     command_instance = CommandClass(commandlineArgs)
@@ -117,7 +117,7 @@ def execScript(scriptPath: str, functionArgs: list, functionName: str = "main", 
             "pid": pid
         }
         IPCMemory.setObj(f"System.kernel.procmgr.execInfo:{scriptPath}", argObj, permission="1111")
-        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112")
+        IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
 
     # Execute the function with the provided arguments
     result = function(functionArgs)
