@@ -19,7 +19,7 @@ class Help:
                 # Print current manual
                 with open("kernel/commands/help/manual.txt", 'r') as f:
                     print(f.read())
-                    return;
+                    return
             
             # Find executable bundle
             helpString: str = ""
