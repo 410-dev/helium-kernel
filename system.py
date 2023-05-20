@@ -17,7 +17,7 @@ class System():
         val = 0
         while True:
             userIn: str = input(f"{val} >>> ")
-            if userIn == "exit":
+            if userIn == Registry.read("SOFTWARE.Helium.SystemQuitOn"):
                 if Registry.read("SOFTWARE.Helium.LabConfigs.EnableBrokenFeatures") == "1":
                     for service in Service.Services.servicesLoaded:
                         Service.kill(service["pid"])

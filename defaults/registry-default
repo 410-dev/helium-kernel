@@ -5,6 +5,7 @@ SOFTWARE.Helium.Settings.Hooks.OthersEnabled=0
 SOFTWARE.Helium.Settings.KernelModulesVerbose=0
 SOFTWARE.Helium.Settings.RawReturnFlag=0
 SOFTWARE.Helium.Settings.PrintIPCWarning=0
+SOFTWARE.Helium.SystemQuitOn=exit
 SOFTWARE.Helium.Hooks.KernelBlacklist={"data": ["ServiceLauncher.py"]}
 SOFTWARE.Helium.Hooks.OtherBlacklist={"data": []}
 SOFTWARE.Helium.Hooks.VerboseLoad=0
