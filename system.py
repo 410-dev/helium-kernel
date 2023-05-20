@@ -1,6 +1,7 @@
 import kernel.argsParser as argsParser
 import kernel.procmgr as procmgr
 import kernel.registry as Registry
+import kernel.services as Service
 
 from kernel.ipcmemory import IPCMemory
 from typing import List
@@ -17,6 +18,9 @@ class System():
         while True:
             userIn: str = input(f"{val} >>> ")
             if userIn == "exit":
+                if Registry.read("SOFTWARE.Helium.LabConfigs.EnableBrokenFeatures") == "1":
+                    for service in Service.Services.servicesLoaded:
+                        Service.kill(service["pid"])
                 break
             args = argsParser.parse(userIn.split())
             if len(args) == 0:
