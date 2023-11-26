@@ -1,10 +1,13 @@
-import asyncio
+
 import threading
 import os
 import importlib
+import random
+import string
 
 import kernel.registry as Registry
 import kernel.procmgr as procmgr
+import kernel.journal as Journal
 from kernel.ipcmemory import IPCMemory
 
 class Services():
@@ -32,6 +35,12 @@ def kill(serviceName, usePID = True) -> bool:
                 if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
                     print(f"[KRNL] [services] Killing service {serviceName} with PID {pid}")
                 break
+    else:
+        pid = serviceName
+        ipid= int(pid)-1
+        object = Services.servicesLoaded[ipid]
+        if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
+            print(f"[KRNL] [services] Killing service with PID {pid}")
             
     if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1" and usePID:
         print(f"[KRNL] [services] Killing service id: {serviceName}")
@@ -46,8 +55,17 @@ def kill(serviceName, usePID = True) -> bool:
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
             print(f"[KRNL] [services] Service {serviceName} not found (object={object})")
         return False
+    
+    # if object["stop_event"] is not None:
+    #     print(f"[KRNL] [services] Stopping service {module_name}")
+    #     object["stop_event"].set()
+    #     thread.join(timeout=10)  # Add a timeout to avoid hanging
+    #     print(f"[KRNL] [services] Service {module_name} stopped")
 
-    if object["thread"] != None:
+    #     # Reset the stop_event and start a new thread
+    #     object["stop_event"].clear()  # Reset the event for the new thread
+    #     thread = start_new_thread(object["stop_event"], commandlineArgs, module_name, executeMethod)
+
     if object["stop_event"] != None:
         print(f"[KRNL] [services] Stopping service {serviceName}")
         object["stop_event"].set()  # Ask the thread to stop
@@ -105,19 +123,26 @@ def launch(commandPath: str, commandlineArgs: list, functionName: str = "main", 
             print(f"[KRNL] [services] Running module {module_name} asynchronously")
 
         
-        loop = asyncio.get_event_loop()
         stop_event = threading.Event()  # This event will be set when the thread should stop
 
+        import asyncio
         def run_in_executor():
             async def executeMethodWrapper():
                 while not stop_event.is_set():
                     try:
                         await executeMethod(commandlineArgs)
+                        Journal.addJournal(f"Service {module_name} finished with ID.")
                     except Exception:
+                        Journal.addJournal(f"Service {module_name} failed. See logs for more information.")
                         break
+                    await asyncio.sleep(1)
 
+                Journal.addJournal(f"Service {module_name} stopped.")
+                print(f"[KRNL] [services] WARNING: Service {module_name} stopped.")
+            
+            asyncio.set_event_loop(asyncio.new_event_loop())  # Create a new event loop
+            loop = asyncio.get_event_loop()  # Get the event loop
             loop.run_until_complete(executeMethodWrapper())
-
         thread = threading.Thread(target=run_in_executor)
         
         argObj["thread"] = thread
