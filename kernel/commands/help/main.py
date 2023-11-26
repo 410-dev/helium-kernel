@@ -13,7 +13,7 @@ class Help:
 
     def main(self) -> int:
         try: 
-            commandPaths: List[str] = json.loads(Registry.read("SOFTWARE.Helium.Settings.Programs.Paths"))['data']
+            commandPaths: List[str] = json.loads(Registry.read("SYSTEM.Helium.Settings.Programs.Paths"))['data']
             
             if len(self.args) == 0:
                 # Print current manual
@@ -33,7 +33,7 @@ class Help:
             
             # If not found, return command not found.
             if helpString == "":
-                return Registry.read("SOFTWARE.Helium.Values.Proc.CommandNotFound")
+                return Registry.read("SYSTEM.Helium.Values.Proc.CommandNotFound")
             
             print(helpString)
         except Exception as e:
