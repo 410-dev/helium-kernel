@@ -3,19 +3,19 @@ import json
 import os
 
 def main(args) -> int:
-    if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-        print("Building data directories")
+    if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+        print("[HOOK] [DataBuild] Building data directories")
 
-    masterList: str = Registry.read("SOFTWARE.Helium.Values.Data.Struct.MasterList")
-    masterList = json.loads(masterList)
-    masterList = masterList['data']
+    Index: str = Registry.read("SYSTEM.Helium.Values.Paths.Data.Index")
+    Index = json.loads(Index)
+    Index = Index['data']
 
-    if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-        print(f"Building {len(masterList)} directories")
+    if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+        print(f"[HOOK] [DataBuild] Building {len(Index)} directories")
     
     buildCount = 0
-    for item in masterList:
-        path: str = Registry.read(f"SOFTWARE.Helium.Values.Data.Struct.{item}")
+    for item in Index:
+        path: str = Registry.read(f"SYSTEM.Helium.Values.Paths.Data.{item}")
         path: list = path.split(os.sep)
         builtSoFar: str = ""
         for parents in path:
@@ -23,11 +23,11 @@ def main(args) -> int:
             if not os.path.exists(builtSoFar):
                 os.mkdir(builtSoFar)
                 buildCount += 1
-                if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                    print(f"Built {builtSoFar}")
+                if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                    print(f"[HOOK] [DataBuild] Built {builtSoFar}")
     
-    if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-        print(f"Done building {buildCount} directories")
+    if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+        print(f"[HOOK] [DataBuild] Done building {buildCount} directories")
     
-    return int(Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess"))
+    return int(Registry.read("SYSTEM.Helium.Values.Proc.CommandExitSuccess"))
     

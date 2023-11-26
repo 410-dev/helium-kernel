@@ -12,32 +12,32 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
     blacklists: list = []
     if kernelHooks:
         
-        if Registry.read("SOFTWARE.Helium.Settings.Hooks.Enabled") == "0":
-            if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                print("Kernel hook support is disabled, skipping...")
+        if Registry.read("SYSTEM.Helium.Settings.Hooks.Enabled") == "0":
+            if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                print("[KRNL] [hookmgr] Kernel hook support is disabled, skipping...")
             return []
         
         hooksPath = os.path.join("kernel", "hooks")
-        blacklistData = Registry.read("SOFTWARE.Helium.Hooks.KernelBlacklist")
+        blacklistData = Registry.read("SYSTEM.Helium.Hooks.KernelBlacklist")
         if blacklistData != None:
             blacklistData = json.loads(blacklistData)
             blacklists = blacklistData['data']
     else:
         
-        if Registry.read("SOFTWARE.Helium.Settings.Hooks.OthersEnabled") == "0":
-            if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                print("Third-party hook support is disabled, skipping...")
+        if Registry.read("SYSTEM.Helium.Settings.Hooks.OthersEnabled") == "0":
+            if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                print("[KRNL] [hookmgr] Third-party hook support is disabled, skipping...")
             return []
         
-        hooksPath = Registry.read("SOFTWARE.Helium.Values.Data.Struct.Hooks")
-        blacklistData = Registry.read("SOFTWARE.Helium.Hooks.OtherBlacklist")
+        hooksPath = Registry.read("SYSTEM.Helium.Values.Paths.Data.Hooks")
+        blacklistData = Registry.read("SYSTEM.Helium.Hooks.OtherBlacklist")
         if blacklistData != None:
             blacklistData = json.loads(blacklistData)
             blacklists = blacklistData['data']
 
-    if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-        print(f"Running hooks from {hooksPath}")
-        print(f"Blacklist: {blacklists}")
+    if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+        print(f"[KRNL] [hookmgr] Running hooks from {hooksPath}")
+        print(f"[KRNL] [hookmgr] Blacklist: {blacklists}")
 
     # Sort the hooks by alphabetical order
     hooks: list = os.listdir(hooksPath)
@@ -47,17 +47,17 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
     
     for hook in hooks:
         if hook.startswith("_") or hook.startswith("."):
-            if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                print(f"Hook '{hook}' is a hidden file, skipping...")
+            if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                print(f"[KRNL] [hookmgr] Hook '{hook}' is a hidden file, skipping...")
             continue
         
         if hook in blacklists:
-            if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1": 
-                print(f"Hook '{hook}' is blacklisted, skipping...")
+            if Registry.read("SYSTEM.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1": 
+                print(f"[KRNL] [hookmgr] Hook '{hook}' is blacklisted, skipping...")
             continue
         
-        if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-            print(f"Running hook '{hook}'...")
+        if Registry.read("SYSTEM.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+            print(f"[KRNL] [hookmgr] Running hook '{hook}'...")
         
         hookPath: str = os.path.join(hooksPath, hook)
         try:
@@ -65,9 +65,9 @@ def runHooks(parameters: list, kernelHooks: bool) -> list:
                 exitcode = procmgr.execScript(hookPath, parameters)
                 reportRow = [hook, exitcode]
                 report.append(reportRow)
-                if Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                    print(f"Report: {reportRow}")
-                if Registry.read("SOFTWARE.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SOFTWARE.Helium.Hooks.VerboseLoad") == "1":
-                    print(f"Hook '{hook}' exited with code {exitcode}")
+                if Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                    print(f"[KRNL] [hookmgr] Report: {reportRow}")
+                if Registry.read("SYSTEM.Helium.Settings.KernelModulesVerbose") == "1" or Registry.read("SYSTEM.Helium.Hooks.VerboseLoad") == "1":
+                    print(f"[KRNL] [hookmgr] Hook '{hook}' exited with code {exitcode}")
         except Exception as e:
-            print(f"ERROR: Failed running hook {hookPath}: {e}")
+            print(f"[KRNL] [hookmgr] ERROR: Failed running hook {hookPath}: {e}")

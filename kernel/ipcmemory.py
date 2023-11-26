@@ -86,14 +86,14 @@ class IPCMemory():
         # [Permission Check] Otherwise, if the object is persistent, set space level to 1 (public space)
         else:
             if lvl == 0:
-                if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                    print("WARNING: Executing script is not in any space. This is not recommended.")
+                if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                    print("[KRNL] [IPCMemory] WARNING: Executing script is not in any space. This is not recommended.")
                 lvl = 1
 
         # [Permission Check] If the object is not accessible, return None
         if permission == "0":
-            if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                print(f"WARNING: Executing script ({execLocation}) does not have permission in its space to access this object '{name}'. Permission: {object['permission']}")
+            if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                print(f"[KRNL] [IPCMemory] WARNING: Executing script ({execLocation}) does not have permission in its space to access this object '{name}'. Permission: {object['permission']}")
             if includeEligiblePermissionData:
                 return None, None
             else:
@@ -116,8 +116,8 @@ class IPCMemory():
     def deleteObj(name: str):
         object, permission = IPCMemory.getObj(name, fullData=True, includeEligiblePermissionData=True)
         if object == None:
-            if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                print(f"Failed to delete object: {name}, Permission: {permission}")
+            if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                print(f"[KRNL] [IPCMemory] Failed to delete object: {name}, Permission: {permission}")
             return False
         else:
             if permission == "2":
@@ -131,21 +131,21 @@ class IPCMemory():
     # Default permission:       0       0      1      2       (0 means no access, 1 means read, 2 means read and write)
     def setObj(name: str, data, persistent = False, permission = "0012"):
         if len(permission) != 4:
-            if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                print("Invalid permission length. Setting to default: 0012")
+            if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                print("[KRNL] [IPCMemory] Invalid permission length. Setting to default: 0012")
             permission = "0012"
 
         if not permission.isnumeric():
-            if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                print("Invalid permission type. Setting to default: 0012")
+            if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                print("[KRNL] [IPCMemory] Invalid permission type. Setting to default: 0012")
             permission = "0012"
 
         # If the object already exists, remove for update
         object, existingPermission = IPCMemory.getObj(name, fullData=True, includeEligiblePermissionData=True)
         if object != None:
             if existingPermission != "2":
-                if Registry.read("SOFTWARE.Helium.Settings.PrintIPCWarning") == "1":
-                    print(f"WARNING: Executing script does not have permission to update (write) this object '{name}'. Permission: {object['permission']}")
+                if Registry.read("SYSTEM.Helium.Settings.PrintIPCWarning") == "1":
+                    print(f"[KRNL] [IPCMemory] WARNING: Executing script does not have permission to update (write) this object '{name}'. Permission: {object['permission']}")
                 return False
 
             if not IPCMemory.deleteObj(name):

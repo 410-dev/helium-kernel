@@ -18,17 +18,23 @@ def kill(serviceName, usePID = True) -> bool:
 
     pid = None
     object = None
+
+    if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
+        print(f"[KRNL] [services] Event kill: {serviceName}, {usePID}")
+
     if not usePID:
         for i in range(0, len(Services.servicesLoaded)):
             if Services.servicesLoaded[i]["name"] == serviceName:
+                if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
+                    print(f"[KRNL] [services] Killing service {serviceName} with PID {pid}")
                 pid = Services.servicesLoaded[i]["pid"]
                 object = Services.servicesLoaded[i]
                 if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-                    print(f"Killing service {serviceName} with PID {pid}")
+                    print(f"[KRNL] [services] Killing service {serviceName} with PID {pid}")
                 break
             
     if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1" and usePID:
-        print(f"Killing service id: {serviceName}")
+        print(f"[KRNL] [services] Killing service id: {serviceName}")
 
     if object != None:
         for i in range(0, len(Services.servicesLoaded)):
@@ -38,34 +44,38 @@ def kill(serviceName, usePID = True) -> bool:
     
     if object == None:
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Service {serviceName} not found")
+            print(f"[KRNL] [services] Service {serviceName} not found (object={object})")
         return False
 
     if object["thread"] != None:
+    if object["stop_event"] != None:
+        print(f"[KRNL] [services] Stopping service {serviceName}")
         object["stop_event"].set()  # Ask the thread to stop
         object["thread"].join()  # Wait for the thread to stop
+        print(f"[KRNL] [services] Service {serviceName} stopped")
         return True
     return False
 
 
 def launch(commandPath: str, commandlineArgs: list, functionName: str = "main", returnRaw: bool = False, asynchronous: bool = True) -> int:
 
-    if Registry.read("SOFTWARE.Helium.LabConfigs.EnableBrokenFeatures") != "1":
-        return
+    # if Registry.read("SOFTWARE.Helium.LabConfigs.EnableBrokenFeatures") != "1":
+    #     return
 
     if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-        print(f"Launching service {commandPath}")
+        print(f"[KRNL] [services] Launching service {commandPath}")
 
-    module_name = f"{commandPath.replace(os.sep, '.')}".split(".py")[0]
+    module_name = f"{commandPath.replace('/', '.')}".split(".py")[0]
+    module_name = module_name.replace("\\\\", ".").replace("\\", ".")
 
     if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-        print(f"Loading module {module_name}")
+        print(f"[KRNL] [services] Loading module {module_name}")
 
     module = importlib.import_module(module_name)
     
     # Reload
     if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-        print(f"Updating module {module_name}")
+        print(f"[KRNL] [services] Updating module {module_name}")
     importlib.reload(module)
 
     # Get the class
@@ -86,13 +96,13 @@ def launch(commandPath: str, commandlineArgs: list, functionName: str = "main", 
         IPCMemory.setObj(f"System.kernel.session", (pid + 1), permission="1112", persistent=True)
         
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Module {module_name} related information object copied to IPC memory")
+            print(f"[KRNL] [services] Module {module_name} related information object copied to IPC memory")
 
 
     # Run asynchronously if needed
     if asynchronous:
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Running module {module_name} asynchronously")
+            print(f"[KRNL] [services] Running module {module_name} asynchronously")
 
         
         loop = asyncio.get_event_loop()
@@ -116,17 +126,17 @@ def launch(commandPath: str, commandlineArgs: list, functionName: str = "main", 
         Services.servicesLoaded.append(argObj)
 
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Module {module_name} thread started")
+            print(f"[KRNL] [services] Module {module_name} thread started")
         result = None
     else:
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Running module {module_name} synchronously")
+            print(f"[KRNL] [services] Running module {module_name} synchronously")
         result = asyncio.run(executeMethod(commandlineArgs))
         if Registry.read("SOFTWARE.Helium.Services.VerboseLoad") == "1":
-            print(f"Module {module_name} finished with result {result}")
+            print(f"[KRNL] [services] Module {module_name} finished with result {result}")
 
 
-    successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
+    successCode = Registry.read("SYSTEM.Helium.Values.Proc.CommandExitSuccess")
     if returnRaw and result != None:
         return result
 
