@@ -15,15 +15,28 @@ class System():
 
     def main(args: List[str]) -> int:
         val = 0
+        userIn = Registry.read("USERS.System.Shell.RunOnLogin")
         while True:
-            userIn: str = input(f"{val} >>> ")
-            if userIn == Registry.read("SOFTWARE.Helium.SystemQuitOn"):
+            if userIn == None:
+                userIn: str = input(f"{val} >>> ")
+            if userIn == Registry.read("SYSTEM.Helium.SystemQuitOn"):
                 if Registry.read("SOFTWARE.Helium.LabConfigs.EnableBrokenFeatures") == "1":
                     for service in Service.Services.servicesLoaded:
                         Service.kill(service["pid"])
+                
+                if Registry.read("USERS.System.Shell.RunOnLogout"):
+                    System.execute(Registry.read("USERS.System.Shell.RunOnLogout"))
                 break
-            args = argsParser.parse(userIn.split())
-            if len(args) == 0:
+
+            if len(userIn.strip()) == 0:
                 continue
-            val = procmgr.launch(args[0], args[1:], Registry.read("SOFTWARE.Helium.Settings.RawReturnFlag") == "1")
+
+            val = System.execute(userIn)
+            userIn = None
             
+            
+    def execute(args):
+        if args == None:
+            return 0
+        args = argsParser.parse(args.split())
+        return procmgr.launch(args[0], args[1:], Registry.read("SYSTEM.Helium.Settings.RawReturnFlag") == "1")
