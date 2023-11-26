@@ -4,6 +4,7 @@ import kernel.hookmgr as hookmgr
 import kernel.registry as Registry
 import time
 import os
+import signal
 from kernel.ipcmemory import IPCMemory
 
 IPCMemory.setObj("System.Cache.StartTime.Epoch", round(time.time()*1000), True, "1111")
@@ -20,3 +21,6 @@ hookmgr.runHooks([], kernelHooks = False)
 Registry.build("defaults/registry-enforced", os.path.join("./", "registry"), silent = True, overwrite=True)
 
 procmgr.exec("system.py", "System", [])
+
+current_pid = os.getpid()
+os.kill(current_pid, signal.SIGTERM)
