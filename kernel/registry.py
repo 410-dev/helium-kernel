@@ -1,7 +1,7 @@
 import json
 import os
 
-def read(key: str, regloc: str = "registry"):
+def read(key: str, regloc: str = "registry", strictlyDisableRecursion: bool = False):
     key = key.replace(".", os.sep)
     if not os.path.exists(os.path.join(regloc, key)):
         return None
@@ -19,7 +19,25 @@ def read(key: str, regloc: str = "registry"):
         
     with open(os.path.join(regloc, key), 'r') as f:
         if os.path.isfile(os.path.join(regloc, key)):
-            return f.read()
+
+            if not strictlyDisableRecursion and read("SYSTEM.Helium.Settings.Registry.ExperimentalFeatures.EnableRecursiveReferences", strictlyDisableRecursion=True) == '1':
+                # Recursive reference.
+                # Get string between ${ and }
+                # Get value of string
+                # Replace ${string} with value
+                # Repeat until no more ${string} is found
+                # Return value
+                value = f.read()
+                while value.find("${") != -1:
+                    start = value.find("${")
+                    end = value.find("}")
+                    key = value[start+2:end]
+                    value = value.replace("${" + key + "}", read(key, regloc))
+
+                return value
+
+            else:
+                return f.read()
         
         else:
             return None
