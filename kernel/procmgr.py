@@ -54,8 +54,8 @@ def launch(command: str, commandlineArgs: list, returnRaw: bool = False) -> int:
         if Registry.read("SYSTEM.Helium.Settings.PrintTraceback") == "1": traceback.print_exc()
         return Registry.read("SYSTEM.Helium.Values.Proc.CommandExitFailure")
 
-def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodName: str = None, returnRaw: bool = False) -> int:
-    module_name = f"{commandPath.replace(os.sep, '.')}".split(".py")[0]
+def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodName: str = "main", returnRaw: bool = False) -> int:
+    module_name = f"{commandPath.replace('/', '.')}".split(".py")[0]
     module = importlib.import_module(module_name)
     
     # Reload
@@ -80,13 +80,13 @@ def exec(commandPath: str, className: str, commandlineArgs: list, executeMethodN
 
     # Instantiate the command and execute it
     command_instance = CommandClass(commandlineArgs)
-    if executeMethodName == None:
-        result = command_instance.main()
-    else:
-        # Complete this
-        executeMethod = getattr(command_instance, executeMethodName)
-        result = executeMethod()
-    successCode = Registry.read("SOFTWARE.Helium.Values.Proc.CommandExitSuccess")
+    # if executeMethodName == None:
+    #     result = command_instance.main()
+    # else:
+    #     # Complete this
+    executeMethod = getattr(command_instance, executeMethodName)
+    result = executeMethod()
+    successCode = Registry.read("SYSTEM.Helium.Values.Proc.CommandExitSuccess")
     if returnRaw and result != None:
         return result
 
